@@ -2,12 +2,46 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MailCheck, Send } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { auth } from '../config/firebase';
+import { onIdTokenChanged } from 'firebase/auth';
 
 export default function VerifySent() {
   const navigate = useNavigate();
   const { user, resendVerification } = useAuth();
   const [resent, setResent] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [waiting, setWaiting] = React.useState(true);
+
+  // Auto-detect verification and redirect to dashboard
+  React.useEffect(() => {
+    let active = true;
+
+    const check = async () => {
+      try { if (auth.currentUser) await auth.currentUser.reload(); } catch {}
+      const verified = Boolean(
+        auth.currentUser?.emailVerified || user?.emailVerified || sessionStorage.getItem('just_verified')
+      );
+      if (active && verified) {
+        sessionStorage.removeItem('just_verified');
+        navigate('/dashboard', { replace: true, state: { fromVerification: true } });
+      }
+    };
+
+    check();
+    const interval = setInterval(check, 2000);
+    const stop = setTimeout(() => { clearInterval(interval); if (active) setWaiting(false); }, 60000);
+
+    const unsub = onIdTokenChanged(auth, async (fbUser) => {
+      if (!fbUser) return;
+      try { await fbUser.reload(); } catch {}
+      if (fbUser.emailVerified) {
+        sessionStorage.removeItem('just_verified');
+        navigate('/dashboard', { replace: true, state: { fromVerification: true } });
+      }
+    });
+
+    return () => { active = false; clearInterval(interval); clearTimeout(stop); try { unsub(); } catch {} };
+  }, [navigate, user?.uid, user?.emailVerified]);
 
   const handleResend = async () => {
     setLoading(true);
@@ -25,7 +59,7 @@ export default function VerifySent() {
         </div>
         <p style={{ color: '#6b7280', marginBottom: 16 }}>
           We sent a verification link to <strong>{user?.email || 'your email'}</strong>.
-          After you click the link in your email, return and log in to access your dashboard.
+          After you click the link in your email, this page will automatically take you to your dashboard once verification is detected.
         </p>
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -49,7 +83,7 @@ export default function VerifySent() {
 
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           <button className="btn btn-primary" onClick={() => navigate('/login')}>Go to Login</button>
-          <a className="btn" href="/#/login">Use Hash Login</a>
+          {waiting && <span style={{ fontSize: 12, color: '#6b7280' }}>Waiting for verification...</span>}
         </div>
 
         <div style={{ marginTop: 10, fontSize: 12, color: '#6b7280' }}>

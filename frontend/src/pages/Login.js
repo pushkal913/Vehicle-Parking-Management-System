@@ -30,7 +30,7 @@ const Login = () => {
     try {
       const result = await login(data);
       if (result?.needsVerification) {
-        navigate('/verify-email');
+        navigate('/verify-sent', { replace: true });
         return;
       }
       if (result.success) {
