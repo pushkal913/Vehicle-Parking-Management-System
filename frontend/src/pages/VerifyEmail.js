@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MailCheck, RefreshCw, Send, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { auth } from '../config/firebase';
 import { toast } from 'react-toastify';
 
 export default function VerifyEmail() {
@@ -33,13 +34,27 @@ export default function VerifyEmail() {
 
   const handleRefresh = async () => {
     setLoading(true);
-    const res = await refreshEmailVerification();
-    setLoading(false);
-    if (res?.emailVerified) {
-      toast.success('Email verified successfully!');
-      navigate('/dashboard');
-    } else {
-      toast.warning('Email not verified yet. Please check your email and click the verification link.');
+    
+    try {
+      // Force reload the Firebase user first
+      if (auth.currentUser) {
+        await auth.currentUser.reload();
+      }
+      
+      // Then check our verification status
+      const res = await refreshEmailVerification();
+      
+      if (res?.emailVerified || auth.currentUser?.emailVerified) {
+        toast.success('Email verified successfully!');
+        navigate('/dashboard');
+      } else {
+        toast.warning('Email not verified yet. Please check your email and click the verification link first.');
+      }
+    } catch (error) {
+      console.error('Verification check error:', error);
+      toast.error('Error checking verification status. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
