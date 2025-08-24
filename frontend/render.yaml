@@ -1,0 +1,15 @@
+# Render.com deployment configuration for frontend
+# This file tells Render how to build and deploy your React app
+
+# Build settings
+build_command: npm run build
+publish_directory: build
+
+# Environment
+node_version: 18
+
+# Routes (for SPA)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

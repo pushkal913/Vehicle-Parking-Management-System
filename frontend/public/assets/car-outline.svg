@@ -1,0 +1,14 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clean white outline for high contrast on purple hero background -->
+  <g stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Car body -->
+    <path d="M90 240c0-18 12-34 29-39l126-36c9-3 19-3 28 0l86 25c5 1 9 5 11 10l10 25h194c21 0 38 17 38 38v8c0 7-5 12-12 12H94c-2 0-4-2-4-4v-39z"/>
+    <!-- Left wheel (outer ring) -->
+    <path d="M126 286a46 46 0 1 0 92 0 46 46 0 0 0-92 0z"/>
+    <!-- Right wheel (outer ring) -->
+    <path d="M520 286a46 46 0 1 0 92 0 46 46 0 0 0-92 0z"/>
+    <!-- Wheel hubs -->
+    <circle cx="172" cy="286" r="18"/>
+    <circle cx="566" cy="286" r="18"/>
+  </g>
+</svg>
