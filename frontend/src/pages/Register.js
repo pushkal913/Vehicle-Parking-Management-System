@@ -50,7 +50,7 @@ const Register = () => {
 
       if (result.success) {
         if (result.needsVerification) {
-          navigate('/verify-email');
+          navigate('/verify-sent', { replace: true });
         } else {
           navigate('/dashboard');
         }
