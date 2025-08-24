@@ -15,10 +15,20 @@ export default function VerifyEmail() {
   const [checkingVerification, setCheckingVerification] = useState(false);
   const [processingFromEmail, setProcessingFromEmail] = useState(false);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('VerifyEmail component mounted');
+    console.log('Current URL:', window.location.href);
+    console.log('Search params:', Object.fromEntries(searchParams));
+    console.log('User:', user);
+  }, []);
+
   // Check if we have verification parameters from email link
   useEffect(() => {
     const mode = searchParams.get('mode');
     const oobCode = searchParams.get('oobCode');
+    
+    console.log('Checking for verification params:', { mode, oobCode: oobCode ? 'present' : 'missing' });
     
     if (mode === 'verifyEmail' && oobCode) {
       console.log('Processing email verification from URL parameters');

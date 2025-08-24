@@ -1,6 +1,7 @@
-# Redirect all routes to index.html for React Router to handle
-/*    /index.html   200
+# Handle all routes for React Router (SPA)
+/verify-email*    /index.html   200
+/__/auth/action*  /index.html   200
+/auth/action*     /index.html   200
 
-# Specifically handle Firebase auth actions
-/__/auth/action    /index.html   200
-/auth/action       /index.html   200
+# Catch all other routes
+/*                /index.html   200
