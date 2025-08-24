@@ -74,28 +74,40 @@ export default function VerifyEmail() {
   // Auto-check verification status when component mounts (only once)
   useEffect(() => {
     const checkInitialVerification = async () => {
-      if (user?.emailVerified) {
-        navigate('/dashboard', { 
-          state: { fromVerification: true },
-          replace: true 
-        });
-        return;
-      }
-      
       // Don't auto-check if we're processing from email
       if (processingFromEmail) {
         return;
       }
       
-      // Silent check - no toast message on initial load
-      setCheckingVerification(true);
-      const res = await refreshEmailVerification();
-      setCheckingVerification(false);
-      if (res?.emailVerified) {
+      // If user is already verified, navigate immediately
+      if (user?.emailVerified) {
+        console.log('User already verified, navigating to dashboard');
         navigate('/dashboard', { 
           state: { fromVerification: true },
           replace: true 
         });
+        return;
+      }
+      
+      // Silent check - no toast message on initial load
+      console.log('Checking verification status silently...');
+      setCheckingVerification(true);
+      
+      try {
+        const res = await refreshEmailVerification();
+        if (res?.emailVerified) {
+          console.log('Verification confirmed, navigating to dashboard');
+          navigate('/dashboard', { 
+            state: { fromVerification: true },
+            replace: true 
+          });
+        } else {
+          console.log('Email not verified yet, showing verification page');
+        }
+      } catch (error) {
+        console.error('Error checking verification:', error);
+      } finally {
+        setCheckingVerification(false);
       }
     };
 
@@ -103,7 +115,7 @@ export default function VerifyEmail() {
     if (user && !processingFromEmail) {
       checkInitialVerification();
     }
-  }, [user?.uid]); // Only depend on user ID to run once per user
+  }, [user?.uid, processingFromEmail]); // Include processingFromEmail in dependencies
 
   const handleRefresh = async () => {
     setLoading(true);
@@ -147,6 +159,14 @@ export default function VerifyEmail() {
   };
 
   if (checkingVerification || processingFromEmail) {
+    // Add timeout to prevent infinite loading
+    setTimeout(() => {
+      if (checkingVerification) {
+        console.log('Timeout reached, stopping verification check');
+        setCheckingVerification(false);
+      }
+    }, 10000); // 10 second timeout
+
     return (
       <div className="container" style={{ maxWidth: 600, margin: '40px auto' }}>
         <div className="card" style={{ padding: 24, textAlign: 'center' }}>
@@ -161,6 +181,9 @@ export default function VerifyEmail() {
           }}></div>
           <p>
             {processingFromEmail ? 'Verifying your email...' : 'Checking verification status...'}
+          </p>
+          <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
+            If this takes too long, please refresh the page
           </p>
         </div>
       </div>

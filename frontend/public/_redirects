@@ -5,5 +5,12 @@
 /verify-email* /verify-email.html 200
 /auth/action* /verify-email.html 200
 
+# Handle all React Router routes - redirect to index.html but preserve path
+/dashboard* /index.html 200
+/login* /index.html 200
+/register* /index.html 200
+/parking* /index.html 200
+/profile* /index.html 200
+
 # Main SPA routing - this should be last
 /* /index.html 200
