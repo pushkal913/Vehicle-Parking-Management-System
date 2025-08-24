@@ -50,7 +50,7 @@ git push -u origin main
    JWT_SECRET=your-super-secure-32-char-jwt-secret
    ENCRYPTION_KEY=your-exactly-32-byte-encryption-key
    FRONTEND_URL=https://your-domain.com
-   MONGODB_URI=your-mongodb-atlas-connection-string
+   MONGODB_URI=your_mongodb_connection_string
    ```
 
 #### Frontend Deployment
@@ -110,7 +110,7 @@ PORT=5000
 FRONTEND_URL=https://your-domain.com
 JWT_SECRET=your-super-secure-jwt-secret-minimum-32-characters
 ENCRYPTION_KEY=your-32-byte-encryption-key-change-now
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/parking
+MONGODB_URI=your_mongodb_connection_string
 MAX_FILE_SIZE=5242880
 ALLOWED_FILE_TYPES=jpg,jpeg,png,pdf
 RATE_LIMIT_WINDOW_MS=900000
