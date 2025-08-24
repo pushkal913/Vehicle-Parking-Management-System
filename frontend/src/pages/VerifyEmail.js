@@ -160,6 +160,24 @@ export default function VerifyEmail() {
   return (
     <div className="container" style={{ maxWidth: 600, margin: '40px auto' }}>
       <div className="card" style={{ padding: 24 }}>
+        {/* Debug info - remove this later */}
+        <div style={{ 
+          background: '#f0f8ff', 
+          padding: '10px', 
+          marginBottom: '20px', 
+          borderRadius: '5px',
+          fontSize: '12px',
+          fontFamily: 'monospace'
+        }}>
+          <strong>Debug Info:</strong><br/>
+          Current URL: {window.location.href}<br/>
+          Mode: {searchParams.get('mode')}<br/>
+          Has oobCode: {searchParams.get('oobCode') ? 'Yes' : 'No'}<br/>
+          User Email: {user?.email || 'None'}<br/>
+          Email Verified: {user?.emailVerified ? 'Yes' : 'No'}<br/>
+          Processing from Email: {processingFromEmail ? 'Yes' : 'No'}
+        </div>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
           <MailCheck />
           <h2 style={{ margin: 0 }}>Verify your email</h2>

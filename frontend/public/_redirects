@@ -1,3 +1,6 @@
+# Handle email verification directly
+/verify.html*     /index.html   200
+
 # Handle all routes for React Router (SPA)
 /verify-email*    /index.html   200
 /__/auth/action*  /index.html   200
