@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .loading { animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Verifying Email...</h1>
+        <div class="loading" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; margin: 20px auto;"></div>
+        <p id="status">Processing verification...</p>
+        <div id="result"></div>
+    </div>
+
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, applyActionCode, checkActionCode } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAXybmt8d0OuTfg4h62E2beF1AZVWBYyHs",
+            authDomain: "university-car-parking-system.firebaseapp.com",
+            projectId: "university-car-parking-system",
+            storageBucket: "university-car-parking-system.firebasestorage.app",
+            messagingSenderId: "377393001940",
+            appId: "1:377393001940:web:69c52d40b77ce4e3165241"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+        const oobCode = urlParams.get('oobCode');
+
+        document.getElementById('status').textContent = `Mode: ${mode}, Code: ${oobCode ? 'Present' : 'Missing'}`;
+
+        if (mode === 'verifyEmail' && oobCode) {
+            try {
+                await checkActionCode(auth, oobCode);
+                await applyActionCode(auth, oobCode);
+                
+                document.getElementById('result').innerHTML = `
+                    <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <h3>✅ Email Verified Successfully!</h3>
+                        <p>Your email has been verified. You can now close this window and return to the app.</p>
+                        <a href="/" style="color: #155724; text-decoration: underline;">Go to App</a>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <h3>❌ Verification Failed</h3>
+                        <p>Error: ${error.message}</p>
+                        <a href="/register" style="color: #721c24; text-decoration: underline;">Register Again</a>
+                    </div>
+                `;
+            }
+        } else {
+            document.getElementById('result').innerHTML = `
+                <div style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <h3>⚠️ Invalid Verification Link</h3>
+                    <p>This link appears to be invalid or incomplete.</p>
+                    <a href="/register" style="color: #856404; text-decoration: underline;">Register Again</a>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
