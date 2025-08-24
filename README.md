@@ -1,4 +1,4 @@
-# University Parking System
+# Vehicle Parking Management System
 
 A campus parking management app with a React frontend and Firebase (Auth + Firestore). An optional Express backend exists in this repo but is not required for the default Firebase-first setup.
 
