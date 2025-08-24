@@ -1,10 +1,9 @@
-# Handle email verification directly
-/verify.html*     /index.html   200
+# Render.com _redirects file for React SPA
 
-# Handle all routes for React Router (SPA)
-/verify-email*    /index.html   200
-/__/auth/action*  /index.html   200
-/auth/action*     /index.html   200
+# Handle Firebase email verification (all possible variations)
+/__/auth/action* /verify-email.html 200
+/verify-email* /verify-email.html 200
+/auth/action* /verify-email.html 200
 
-# Catch all other routes
-/*                /index.html   200
+# Main SPA routing - this should be last
+/* /index.html 200
