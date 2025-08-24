@@ -9,13 +9,18 @@ export default function AuthAction() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState('loading'); // 'loading', 'success', 'error'
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState('Processing verification...');
 
   useEffect(() => {
+    console.log('AuthAction component loaded');
+    console.log('Current URL params:', Object.fromEntries(searchParams));
+    
     const handleAuthAction = async () => {
       const mode = searchParams.get('mode');
       const actionCode = searchParams.get('oobCode');
       const continueUrl = searchParams.get('continueUrl');
+
+      console.log('Auth action details:', { mode, actionCode: actionCode ? 'present' : 'missing', continueUrl });
 
       if (!mode || !actionCode) {
         setStatus('error');
@@ -26,10 +31,14 @@ export default function AuthAction() {
       try {
         switch (mode) {
           case 'verifyEmail':
+            console.log('Attempting email verification...');
             // Check if the action code is valid first
             await checkActionCode(auth, actionCode);
+            console.log('Action code is valid, applying verification...');
+            
             // Apply the email verification
             await applyActionCode(auth, actionCode);
+            console.log('Email verification applied successfully');
             
             setStatus('success');
             setMessage('Email verified successfully! Redirecting to your dashboard...');
@@ -40,8 +49,10 @@ export default function AuthAction() {
             // Wait a moment then redirect
             setTimeout(() => {
               if (continueUrl) {
+                console.log('Redirecting to continue URL:', continueUrl);
                 window.location.href = continueUrl;
               } else {
+                console.log('Redirecting to verify-email page');
                 navigate('/verify-email');
               }
             }, 2000);
@@ -71,7 +82,7 @@ export default function AuthAction() {
             setMessage('This account has been disabled. Please contact support.');
             break;
           default:
-            setMessage('Failed to verify email. Please try again or contact support.');
+            setMessage(`Failed to verify email: ${error.message}. Please try again or contact support.`);
         }
       }
     };
