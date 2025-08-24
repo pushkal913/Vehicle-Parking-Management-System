@@ -90,6 +90,7 @@ export default function VerifyEmail() {
           <a className="btn" href="https://outlook.live.com/mail/0/inbox" target="_blank" rel="noreferrer">Open Outlook</a>
           <a className="btn" href="https://mail.yahoo.com" target="_blank" rel="noreferrer">Open Yahoo</a>
           <a className="btn" href="https://mail.proton.me/u/0/inbox" target="_blank" rel="noreferrer">Proton</a>
+          <a className="btn btn-primary" href="/login">Go to Login</a>
         </div>
         {resent && <div style={{ marginTop: 12, fontSize: 12, color: '#059669' }}>Verification email resent. Check spam too.</div>}
         {waiting && (
