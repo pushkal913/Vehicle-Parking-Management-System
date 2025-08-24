@@ -49,10 +49,9 @@ export default function VerifyEmail() {
         await auth.currentUser.reload();
       }
       
-      toast.success('Email verified successfully!');
       console.log('Email verification successful, redirecting to dashboard');
       
-      // Clear URL parameters and redirect
+      // Clear URL parameters and redirect immediately (no toast here, let dashboard handle success message)
       navigate('/dashboard', { replace: true });
       
     } catch (error) {
@@ -72,11 +71,14 @@ export default function VerifyEmail() {
     }
   };
 
-  // Auto-check verification status when component mounts
+  // Auto-check verification status when component mounts (only once)
   useEffect(() => {
     const checkInitialVerification = async () => {
       if (user?.emailVerified) {
-        navigate('/dashboard');
+        navigate('/dashboard', { 
+          state: { fromVerification: true },
+          replace: true 
+        });
         return;
       }
       
@@ -85,18 +87,23 @@ export default function VerifyEmail() {
         return;
       }
       
-      // Auto-check verification status when user returns from email
+      // Silent check - no toast message on initial load
       setCheckingVerification(true);
       const res = await refreshEmailVerification();
       setCheckingVerification(false);
       if (res?.emailVerified) {
-        toast.success('Email verified successfully!');
-        navigate('/dashboard');
+        navigate('/dashboard', { 
+          state: { fromVerification: true },
+          replace: true 
+        });
       }
     };
 
-    checkInitialVerification();
-  }, [user, refreshEmailVerification, navigate, processingFromEmail]);
+    // Only run once when component mounts and user is available
+    if (user && !processingFromEmail) {
+      checkInitialVerification();
+    }
+  }, [user?.uid]); // Only depend on user ID to run once per user
 
   const handleRefresh = async () => {
     setLoading(true);
@@ -111,8 +118,11 @@ export default function VerifyEmail() {
       const res = await refreshEmailVerification();
       
       if (res?.emailVerified || auth.currentUser?.emailVerified) {
-        toast.success('Email verified successfully!');
-        navigate('/dashboard');
+        // Navigate directly without toast - let Dashboard show welcome message
+        navigate('/dashboard', { 
+          state: { fromVerification: true },
+          replace: true 
+        });
       } else {
         toast.warning('Email not verified yet. Please check your email and click the verification link first.');
       }

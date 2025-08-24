@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { collection, getDocs, query, where, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { toast } from 'react-toastify';
 import { 
   Car, 
   Calendar, 
@@ -17,6 +18,7 @@ import {
 
 const Dashboard = () => {
   const { user, updateUser } = useAuth();
+  const location = useLocation();
   const [stats, setStats] = useState({
     totalBookings: 0,
     activeBookings: 0,
@@ -35,6 +37,24 @@ const Dashboard = () => {
     licensePlate: '',
     vehicleType: 'car'
   });
+
+  // Check if user just came from email verification
+  useEffect(() => {
+    // Only show verification success message if coming from verify page or fresh login
+    if (user?.emailVerified && !sessionStorage.getItem('verification_welcomed')) {
+      const fromVerification = location.state?.fromVerification || 
+                              document.referrer.includes('/verify-email') ||
+                              window.location.href.includes('mode=verifyEmail') ||
+                              sessionStorage.getItem('just_verified');
+      
+      if (fromVerification || !sessionStorage.getItem('dashboard_visited')) {
+        toast.success('🎉 Email verified successfully! Welcome to your dashboard!');
+        sessionStorage.setItem('verification_welcomed', 'true');
+        sessionStorage.removeItem('just_verified'); // Clean up
+      }
+      sessionStorage.setItem('dashboard_visited', 'true');
+    }
+  }, [user?.emailVerified, location]);
 
   useEffect(() => {
     // If superadmin, do not load standard dashboard
