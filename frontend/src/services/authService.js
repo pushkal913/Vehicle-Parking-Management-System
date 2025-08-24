@@ -47,7 +47,7 @@ export const authService = {
       // Send email verification link
       try {
         const actionCodeSettings = {
-          url: `${window.location.origin}/verify-email`,
+          url: `${window.location.origin}/verify-email?mode=verify`,
           handleCodeInApp: true,
         };
         await sendEmailVerification(user, actionCodeSettings);
@@ -129,7 +129,7 @@ export const authService = {
     if (!user) return { success: false, error: 'No authenticated user' };
     try {
       const actionCodeSettings = {
-        url: `${window.location.origin}/verify-email`,
+        url: `${window.location.origin}/verify-email?mode=verify`,
         handleCodeInApp: true,
       };
       await sendEmailVerification(user, actionCodeSettings);

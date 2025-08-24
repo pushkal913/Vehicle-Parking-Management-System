@@ -404,6 +404,10 @@ select.form-input[multiple] {
   100% { transform: rotate(360deg); }
 }
 
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;
