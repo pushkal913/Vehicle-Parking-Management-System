@@ -1,0 +1,6 @@
+# Redirect all routes to index.html for React Router to handle
+/*    /index.html   200
+
+# Specifically handle Firebase auth actions
+/__/auth/action    /index.html   200
+/auth/action       /index.html   200

@@ -1,16 +1,66 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MailCheck, RefreshCw, Send, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { auth } from '../config/firebase';
+import { applyActionCode, checkActionCode } from 'firebase/auth';
 import { toast } from 'react-toastify';
 
 export default function VerifyEmail() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, refreshEmailVerification, resendVerification } = useAuth();
   const [loading, setLoading] = useState(false);
   const [resent, setResent] = useState(false);
   const [checkingVerification, setCheckingVerification] = useState(false);
+  const [processingFromEmail, setProcessingFromEmail] = useState(false);
+
+  // Check if we have verification parameters from email link
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    const oobCode = searchParams.get('oobCode');
+    
+    if (mode === 'verifyEmail' && oobCode) {
+      console.log('Processing email verification from URL parameters');
+      setProcessingFromEmail(true);
+      handleEmailVerification(oobCode);
+    }
+  }, [searchParams]);
+
+  // Handle email verification from URL parameters
+  const handleEmailVerification = async (actionCode) => {
+    try {
+      console.log('Applying email verification code...');
+      await checkActionCode(auth, actionCode);
+      await applyActionCode(auth, actionCode);
+      
+      // Reload user to get updated verification status
+      if (auth.currentUser) {
+        await auth.currentUser.reload();
+      }
+      
+      toast.success('Email verified successfully!');
+      console.log('Email verification successful, redirecting to dashboard');
+      
+      // Clear URL parameters and redirect
+      navigate('/dashboard', { replace: true });
+      
+    } catch (error) {
+      console.error('Email verification error:', error);
+      setProcessingFromEmail(false);
+      
+      switch (error.code) {
+        case 'auth/expired-action-code':
+          toast.error('This verification link has expired. Please request a new one.');
+          break;
+        case 'auth/invalid-action-code':
+          toast.error('This verification link is invalid. Please request a new one.');
+          break;
+        default:
+          toast.error('Failed to verify email. Please try again.');
+      }
+    }
+  };
 
   // Auto-check verification status when component mounts
   useEffect(() => {
@@ -19,6 +69,12 @@ export default function VerifyEmail() {
         navigate('/dashboard');
         return;
       }
+      
+      // Don't auto-check if we're processing from email
+      if (processingFromEmail) {
+        return;
+      }
+      
       // Auto-check verification status when user returns from email
       setCheckingVerification(true);
       const res = await refreshEmailVerification();
@@ -30,7 +86,7 @@ export default function VerifyEmail() {
     };
 
     checkInitialVerification();
-  }, [user, refreshEmailVerification, navigate]);
+  }, [user, refreshEmailVerification, navigate, processingFromEmail]);
 
   const handleRefresh = async () => {
     setLoading(true);
@@ -70,7 +126,7 @@ export default function VerifyEmail() {
     }
   };
 
-  if (checkingVerification) {
+  if (checkingVerification || processingFromEmail) {
     return (
       <div className="container" style={{ maxWidth: 600, margin: '40px auto' }}>
         <div className="card" style={{ padding: 24, textAlign: 'center' }}>
@@ -83,7 +139,9 @@ export default function VerifyEmail() {
             animation: 'spin 2s linear infinite',
             margin: '20px auto'
           }}></div>
-          <p>Checking verification status...</p>
+          <p>
+            {processingFromEmail ? 'Verifying your email...' : 'Checking verification status...'}
+          </p>
         </div>
       </div>
     );
