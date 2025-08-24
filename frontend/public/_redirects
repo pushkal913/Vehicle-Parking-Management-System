@@ -1,16 +1,10 @@
-# Render.com _redirects file for React SPA
+# Render.com _redirects file for React SPA with HashRouter
 
 # Handle Firebase email verification (all possible variations)
 /__/auth/action* /verify-email.html 200
 /verify-email* /verify-email.html 200
 /auth/action* /verify-email.html 200
 
-# Handle all React Router routes - redirect to index.html but preserve path
-/dashboard* /index.html 200
-/login* /index.html 200
-/register* /index.html 200
-/parking* /index.html 200
-/profile* /index.html 200
-
-# Main SPA routing - this should be last
+# For HashRouter, all routes should go to index.html
+# The hash part will be handled by React Router client-side
 /* /index.html 200

@@ -73,6 +73,8 @@ export default function VerifyEmail() {
 
   // Auto-check verification status when component mounts (only once)
   useEffect(() => {
+    let mounted = true;
+    
     const checkInitialVerification = async () => {
       // Don't auto-check if we're processing from email
       if (processingFromEmail) {
@@ -82,39 +84,69 @@ export default function VerifyEmail() {
       // If user is already verified, navigate immediately
       if (user?.emailVerified) {
         console.log('User already verified, navigating to dashboard');
-        navigate('/dashboard', { 
-          state: { fromVerification: true },
-          replace: true 
-        });
-        return;
-      }
-      
-      // Silent check - no toast message on initial load
-      console.log('Checking verification status silently...');
-      setCheckingVerification(true);
-      
-      try {
-        const res = await refreshEmailVerification();
-        if (res?.emailVerified) {
-          console.log('Verification confirmed, navigating to dashboard');
+        if (mounted) {
           navigate('/dashboard', { 
             state: { fromVerification: true },
             replace: true 
           });
-        } else {
-          console.log('Email not verified yet, showing verification page');
+        }
+        return;
+      }
+      
+      console.log('Checking verification status silently...');
+      if (mounted) {
+        setCheckingVerification(true);
+      }
+      
+      try {
+        const res = await refreshEmailVerification();
+        if (mounted) {
+          if (res?.emailVerified) {
+            console.log('Verification confirmed, navigating to dashboard');
+            navigate('/dashboard', { 
+              state: { fromVerification: true },
+              replace: true 
+            });
+          } else {
+            console.log('Email not verified yet, showing verification page');
+            setCheckingVerification(false);
+          }
         }
       } catch (error) {
         console.error('Error checking verification:', error);
-      } finally {
-        setCheckingVerification(false);
+        if (mounted) {
+          setCheckingVerification(false);
+        }
       }
     };
+
+    // Add a timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      if (mounted && checkingVerification) {
+        console.log('Timeout reached, stopping verification check');
+        setCheckingVerification(false);
+      }
+    }, 5000);
 
     // Only run once when component mounts and user is available
     if (user && !processingFromEmail) {
       checkInitialVerification();
+    } else if (user && user.emailVerified) {
+      // User is verified, just navigate
+      if (mounted) {
+        navigate('/dashboard', { replace: true });
+      }
+    } else {
+      // No auto-check needed, stop loading
+      if (mounted) {
+        setCheckingVerification(false);
+      }
     }
+
+    return () => {
+      mounted = false;
+      clearTimeout(timeout);
+    };
   }, [user?.uid, processingFromEmail]); // Include processingFromEmail in dependencies
 
   const handleRefresh = async () => {

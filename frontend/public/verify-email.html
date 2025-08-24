@@ -111,14 +111,14 @@
                         <h3>✅ Email Verified Successfully!</h3>
                         <p>Your email has been verified. You can now access your parking dashboard.</p>
                         <p><small>Redirecting to dashboard in 3 seconds...</small></p>
-                        <a href="/dashboard" class="btn">Go to Dashboard</a>
-                        <a href="/login" class="btn">Login</a>
+                        <a href="/#/dashboard" class="btn">Go to Dashboard</a>
+                        <a href="/#/login" class="btn">Login</a>
                     </div>
                 `;
                 
-                // Auto-redirect to dashboard after 3 seconds
+                // Auto-redirect to dashboard after 3 seconds using hash routing
                 setTimeout(() => {
-                    window.location.href = '/dashboard';
+                    window.location.href = '/#/dashboard';
                 }, 3000);
             } catch (error) {
                 console.error('Verification error:', error);
@@ -128,7 +128,7 @@
                         <h3>❌ Verification Failed</h3>
                         <p>Error: ${error.message}</p>
                         <p>This link may have expired or been used already.</p>
-                        <a href="/register" class="btn">Register Again</a>
+                        <a href="/#/register" class="btn">Register Again</a>
                         <a href="/" class="btn">Go to Home</a>
                     </div>
                 `;
@@ -139,7 +139,7 @@
                 <div class="error">
                     <h3>⚠️ Invalid Verification Link</h3>
                     <p>This link appears to be invalid or incomplete.</p>
-                    <a href="/register" class="btn">Register Again</a>
+                    <a href="/#/register" class="btn">Register Again</a>
                     <a href="/" class="btn">Go to Home</a>
                 </div>
             `;
