@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { MailCheck, Send } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { auth } from '../config/firebase';
+import { onIdTokenChanged } from 'firebase/auth';
 
 export default function VerifyEmail() {
   const navigate = useNavigate();
   const { user, resendVerification } = useAuth();
   const [resent, setResent] = useState(false);
+  const [waiting, setWaiting] = useState(true);
 
   // Passive auto-detect of verification; no manual "I Verified" button
   useEffect(() => {
@@ -27,13 +29,18 @@ export default function VerifyEmail() {
       if (active && verified) {
         sessionStorage.removeItem('just_verified');
         navigate('/dashboard', { replace: true, state: { fromVerification: true } });
+        setWaiting(false);
       }
     };
 
     // Initial check + short polling for a few seconds (handles email click in another tab)
     check();
-    const interval = setInterval(check, 1500);
-    const stop = setTimeout(() => clearInterval(interval), 8000);
+    const interval = setInterval(check, 2000);
+    // Extend polling window to 60 seconds to catch delayed verification
+    const stop = setTimeout(() => {
+      clearInterval(interval);
+      if (active) setWaiting(false);
+    }, 60000);
 
     return () => {
       active = false;
@@ -41,6 +48,23 @@ export default function VerifyEmail() {
       clearTimeout(stop);
     };
   }, [user?.uid, user?.emailVerified, navigate]);
+
+  // Also subscribe to auth token changes which occur after verification
+  useEffect(() => {
+    const unsub = onIdTokenChanged(auth, async (fbUser) => {
+      if (!fbUser) return;
+      try { await fbUser.reload(); } catch {}
+      if (fbUser.emailVerified) {
+        sessionStorage.removeItem('just_verified');
+        navigate('/dashboard', { replace: true, state: { fromVerification: true } });
+      }
+    });
+    return () => unsubscribeSafe(unsub);
+  }, [navigate]);
+
+  const unsubscribeSafe = (unsub) => {
+    try { if (typeof unsub === 'function') unsub(); } catch {}
+  };
 
   const handleResend = async () => {
     const res = await resendVerification();
@@ -58,14 +82,21 @@ export default function VerifyEmail() {
           We sent a verification link to <strong>{user?.email || 'your email'}</strong>.
           After you click the link in your email, this page will automatically take you to your dashboard.
         </p>
-        <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap', alignItems: 'center' }}>
           <button className="btn btn-secondary" onClick={handleResend}>
             <Send size={16} /> Resend Link
           </button>
           <a className="btn" href="https://mail.google.com" target="_blank" rel="noreferrer">Open Gmail</a>
           <a className="btn" href="https://outlook.live.com/mail/0/inbox" target="_blank" rel="noreferrer">Open Outlook</a>
+          <a className="btn" href="https://mail.yahoo.com" target="_blank" rel="noreferrer">Open Yahoo</a>
+          <a className="btn" href="https://mail.proton.me/u/0/inbox" target="_blank" rel="noreferrer">Proton</a>
         </div>
         {resent && <div style={{ marginTop: 12, fontSize: 12, color: '#059669' }}>Verification email resent. Check spam too.</div>}
+        {waiting && (
+          <div style={{ marginTop: 14, fontSize: 12, color: '#6b7280' }}>
+            Waiting for verification... this page will redirect automatically once detected.
+          </div>
+        )}
       </div>
     </div>
   );
