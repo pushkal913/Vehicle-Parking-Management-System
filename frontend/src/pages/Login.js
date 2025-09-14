@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, Lock, Eye, EyeOff, Link2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -119,7 +119,7 @@ const Login = () => {
           )}
         </div>
 
-  {/* Submit Button */}
+        {/* Submit Button */}
         <button
           type="submit"
           className="btn btn-primary"
@@ -134,25 +134,7 @@ const Login = () => {
           ) : (
             'Sign In'
           )}
-        </button>
-
-        {/* Passwordless */}
-        <button
-          type="button"
-          onClick={async () => {
-            const email = document.querySelector('input[name="email"]').value;
-            if (!email) return alert('Enter your email first');
-            const res = await startEmailLinkSignIn(email);
-            if (res?.success) navigate('/finish-signin');
-          }}
-          className="btn btn-secondary"
-          style={{ width: '100%', marginTop: '10px' }}
-        >
-          <Link2 size={16} style={{ marginRight: 6 }} />
-          Email me a sign-in link
-        </button>
-
-        {/* Register Link */}
+        </button>        {/* Register Link */}
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
           <p style={{ color: '#666' }}>
             Don't have an account?{' '}

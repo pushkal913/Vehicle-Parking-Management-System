@@ -28,6 +28,12 @@ const Bookings = () => {
     dateRange: '7'
   });
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Cancellation modal state
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [bookingToCancel, setBookingToCancel] = useState(null);
+  const [cancellationReason, setCancellationReason] = useState('');
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     fetchBookings();
@@ -85,19 +91,56 @@ const Bookings = () => {
     setFilteredBookings(filtered);
   };
 
-  const handleCancelBooking = async (bookingId) => {
+  const handleCancelBooking = async (booking) => {
+    // For standard users, show modal to get cancellation reason
+    if (user?.role !== 'superadmin') {
+      setBookingToCancel(booking);
+      setShowCancelModal(true);
+      setCancellationReason('');
+      return;
+    }
+
+    // For admin users, proceed with simple confirmation
     if (!window.confirm('Are you sure you want to cancel this booking?')) {
       return;
     }
 
     try {
-      await bookingService.cancelBooking(bookingId);
+      await bookingService.cancelBooking(booking._id);
       toast.success('Booking cancelled successfully');
       fetchBookings();
     } catch (error) {
       console.error('Error cancelling booking:', error);
       toast.error(error.message || 'Failed to cancel booking');
     }
+  };
+
+  const confirmCancellation = async () => {
+    if (!cancellationReason.trim()) {
+      toast.error('Please provide a reason for cancellation');
+      return;
+    }
+
+    setCancelling(true);
+    try {
+      await bookingService.cancelBooking(bookingToCancel._id, cancellationReason.trim());
+      toast.success('Booking cancelled successfully');
+      setShowCancelModal(false);
+      setBookingToCancel(null);
+      setCancellationReason('');
+      fetchBookings();
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      toast.error(error.message || 'Failed to cancel booking');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const closeCancelModal = () => {
+    setShowCancelModal(false);
+    setBookingToCancel(null);
+    setCancellationReason('');
   };
 
   const getStatusBadge = (status) => {
@@ -290,7 +333,7 @@ const Bookings = () => {
 
                   {isBookingCancellable(booking) && (
                     <button
-                      onClick={() => handleCancelBooking(booking._id)}
+                      onClick={() => handleCancelBooking(booking)}
                       className="btn btn-danger btn-sm"
                     >
                       <Trash2 size={14} />
@@ -335,6 +378,78 @@ const Bookings = () => {
           <div className="stat-card">
             <div className="stat-value">{bookings.length}</div>
             <div className="stat-label">Total Bookings</div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancellation Modal */}
+      {showCancelModal && (
+        <div className="modal-overlay" onClick={closeCancelModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Cancel Booking</h3>
+              <button className="modal-close" onClick={closeCancelModal}>&times;</button>
+            </div>
+            
+            <div className="modal-body">
+              {bookingToCancel && (
+                <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                  <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>
+                    Booking Details
+                  </h4>
+                  <p style={{ margin: '5px 0', color: '#666' }}>
+                    <strong>Slot:</strong> {bookingToCancel.parkingSlot?.slotNumber || 'Unknown'}
+                  </p>
+                  <p style={{ margin: '5px 0', color: '#666' }}>
+                    <strong>Date:</strong> {formatDate(bookingToCancel.startTime)}
+                  </p>
+                  <p style={{ margin: '5px 0', color: '#666' }}>
+                    <strong>Time:</strong> {formatTime(bookingToCancel.startTime)} - {formatTime(bookingToCancel.endTime)}
+                  </p>
+                </div>
+              )}
+              
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 'bold' }}>
+                  Reason for Cancellation *
+                </label>
+                <textarea
+                  className="form-input"
+                  rows="4"
+                  placeholder="Please provide a reason for cancelling this booking..."
+                  value={cancellationReason}
+                  onChange={(e) => setCancellationReason(e.target.value)}
+                  style={{ resize: 'vertical', minHeight: '100px' }}
+                />
+                <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+                  This information will be recorded for administrative purposes.
+                </div>
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button
+                className="btn btn-outline"
+                onClick={closeCancelModal}
+                disabled={cancelling}
+              >
+                Keep Booking
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={confirmCancellation}
+                disabled={cancelling || !cancellationReason.trim()}
+              >
+                {cancelling ? (
+                  <>
+                    <div className="spinner" style={{ width: '16px', height: '16px' }}></div>
+                    Cancelling...
+                  </>
+                ) : (
+                  'Cancel Booking'
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -39,16 +39,24 @@ export const bookingService = {
     return { id: ref.id, ...bookingData };
   },
 
-  async cancelBooking(bookingId) {
+  async cancelBooking(bookingId, reason = null) {
     const bRef = doc(db, 'bookings', bookingId);
     const snap = await getDoc(bRef);
     if (!snap.exists()) throw new Error('Booking not found');
     const b = snap.data();
 
-    await updateDoc(bRef, {
+    const updateData = {
       status: 'cancelled',
       updatedAt: new Date().toISOString(),
-    });
+    };
+
+    // Add cancellation reason if provided
+    if (reason) {
+      updateData.cancellationReason = reason;
+      updateData.cancelledAt = new Date().toISOString();
+    }
+
+    await updateDoc(bRef, updateData);
     await parkingService.clearCurrentBooking(b.slotId, bookingId);
   },
 
