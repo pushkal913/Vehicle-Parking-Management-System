@@ -11,7 +11,6 @@ import {
   Plus,
   Search,
   Filter,
-  Edit,
   Trash2,
   CheckCircle,
   XCircle
@@ -178,7 +177,24 @@ const Bookings = () => {
   };
 
   const isBookingCancellable = (booking) => {
-    return booking.status === 'active' && new Date(booking.startTime) > new Date();
+    const now = new Date();
+    const startTime = new Date(booking.startTime);
+    const isActive = booking.status === 'active';
+    const isFuture = startTime > now;
+    
+    // Debug logging
+    console.log('Booking cancellable check:', {
+      bookingId: booking._id,
+      status: booking.status,
+      startTime: booking.startTime,
+      startTimeParsed: startTime,
+      now: now,
+      isActive,
+      isFuture,
+      result: isActive && isFuture
+    });
+    
+    return isActive && isFuture;
   };
 
   if (loading) {
@@ -323,14 +339,6 @@ const Bookings = () => {
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                  <Link 
-                    to={`/bookings/${booking._id}`}
-                    className="btn btn-outline btn-sm"
-                  >
-                    <Edit size={14} />
-                    View Details
-                  </Link>
-
                   {isBookingCancellable(booking) && (
                     <button
                       onClick={() => handleCancelBooking(booking)}
