@@ -3,7 +3,7 @@
 ## ✅ System Status
 - ✅ Backend server running on http://localhost:5000
 - ✅ Frontend server running on http://localhost:3000
-- ✅ MongoDB Memory Server connected
+- ✅ Firebase server connected
 - ✅ 50 parking slots initialized
 - ✅ Demo accounts created
 - ✅ All pages and components working
