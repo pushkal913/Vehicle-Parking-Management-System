@@ -12,34 +12,6 @@
 
 Open your browser and go to: **http://localhost:3000**
 
-## 👥 Demo Accounts
-
-### Admin Account
-- **Email:** admin@university.edu
-- **Password:** Admin123!
-- **Role:** Administrator
-
-### Faculty Accounts
-- **Email:** sarah.johnson@university.edu
-- **Password:** Faculty123!
-- **Role:** Faculty
-
-- **Email:** michael.smith@university.edu
-- **Password:** Faculty123!
-- **Role:** Faculty
-
-### Student Accounts
-- **Email:** emily.davis@university.edu
-- **Password:** Student123!
-- **Role:** Student
-
-- **Email:** john.wilson@university.edu
-- **Password:** Student123!
-- **Role:** Student
-
-- **Email:** alex.brown@university.edu
-- **Password:** Student123!
-- **Role:** Student
 
 ## 🔧 Features Available
 
