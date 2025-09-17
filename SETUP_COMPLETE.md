@@ -37,18 +37,18 @@ npm start       # Start React app
 
 ### 🔑 Administrator (Full Access)
 - **Email:** `admin@university.edu`
-- **Password:** `Admin123!`
+- **Password:** `Admin*******`
 - **Features:** User management, system analytics, booking oversight
 
 ### 👨‍🏫 Faculty Members
-- **Dr. Sarah Johnson:** `sarah.johnson@university.edu` / `Faculty123!`
-- **Prof. Michael Chen:** `michael.chen@university.edu` / `Faculty123!`
+- **Dr. Sarah Johnson:** `sarah.johnson@university*****` / 
+- **Prof. Michael Chen:** `michael.chen@university****` /
 - **Features:** Priority booking, extended privileges
 
 ### 🎓 Students
-- **Emily Davis:** `emily.davis@university.edu` / `Student123!`
-- **James Wilson:** `james.wilson@university.edu` / `Student123!`
-- **Maria Garcia:** `maria.garcia@university.edu` / `Student123!`
+- **Emily Davis:** `emily.davis@university.****` / 
+- **James Wilson:** `james.wilson@university.*****` /
+- **Maria Garcia:** `maria.garcia@university.****` / 
 - **Features:** Standard booking, vehicle management
 
 📋 **Complete guide:** [DEMO_ACCOUNTS.md](./DEMO_ACCOUNTS.md)
