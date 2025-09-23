@@ -28,8 +28,8 @@ const Home = () => {
           <p className="hero-subtitle">
             Secure, encrypted, and intelligent parking management for the modern campus
           </p>
-          <div style={{display:'flex',justifyContent:'center',marginBottom:16}}>
-            <img src="/assets/hero-logo-new.png" alt="University Parking Logo" style={{maxWidth: 360, width: '100%', height: 'auto'}} />
+          <div style={{display:'flex',justifyContent:'center',marginBottom:24}}>
+            <img src="/assets/landing-page-banner.png" alt="University Parking Banner" style={{maxWidth: 500, width: '100%', height: 'auto', borderRadius: '12px', boxShadow: '0 8px 25px rgba(0, 0, 0, 0.2)'}} />
           </div>
           
           {isAuthenticated ? (
