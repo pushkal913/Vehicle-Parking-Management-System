@@ -1,5 +1,5 @@
 import { collection, addDoc, getDocs, getDoc, doc, updateDoc, orderBy, query, where, serverTimestamp } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db, auth } from '../config/firebase';
 import { parkingService } from './parkingService';
 
 export const bookingService = {
@@ -61,24 +61,48 @@ export const bookingService = {
   },
 
   async completeExpiredBookingsNow() {
-    const now = new Date();
-    const qRef = query(collection(db, 'bookings'), where('status', '==', 'active'));
-    const snap = await getDocs(qRef);
-    const ops = [];
-    for (const d of snap.docs) {
-      const b = d.data();
-      if (new Date(b.endTime) <= now) {
-        ops.push(updateDoc(doc(db, 'bookings', d.id), { status: 'completed', updatedAt: new Date().toISOString() }));
-        ops.push(parkingService.clearCurrentBooking(b.slotId, d.id));
+    // This function should only be called by admin/backend
+    // Standard users don't have permission to query all active bookings
+    try {
+      const now = new Date();
+      const qRef = query(collection(db, 'bookings'), where('status', '==', 'active'));
+      const snap = await getDocs(qRef);
+      const ops = [];
+      for (const d of snap.docs) {
+        const b = d.data();
+        if (new Date(b.endTime) <= now) {
+          ops.push(updateDoc(doc(db, 'bookings', d.id), { status: 'completed', updatedAt: new Date().toISOString() }));
+          ops.push(parkingService.clearCurrentBooking(b.slotId, d.id));
+        }
       }
+      await Promise.all(ops);
+    } catch (error) {
+      // Silently fail if user doesn't have permission (standard user)
+      console.log('Unable to complete expired bookings (requires admin)');
     }
-    await Promise.all(ops);
   },
 
   async getUserBookings(userId) {
-    await this.completeExpiredBookingsNow();
+    // Don't call completeExpiredBookingsNow for standard users
+    // Just fetch their bookings directly
+    
+    // DEBUG: Log the userId being queried and current auth
+    console.log('🔍 DEBUG getUserBookings:', {
+      queryUserId: userId,
+      authUid: auth.currentUser?.uid,
+      authEmail: auth.currentUser?.email,
+      authVerified: auth.currentUser?.emailVerified
+    });
+    
     const qRef = query(collection(db, 'bookings'), where('userId', '==', userId));
     const snap = await getDocs(qRef);
+    
+    // DEBUG: Log query results
+    console.log('🔍 DEBUG Query Results:', {
+      docsFound: snap.docs.length,
+      firstDocData: snap.docs[0]?.data()
+    });
+    
     const items = snap.docs.map((d) => ({ _id: d.id, ...d.data() }));
     // Sort desc by createdAt
     items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));

@@ -45,7 +45,17 @@ const Bookings = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const items = await bookingService.getUserBookings(user.id || user.uid || user.userId);
+      
+      const userIdToQuery = user.id || user.uid || user.userId;
+      
+      // DEBUG: Log user object and ID resolution
+      console.log('🔍 DEBUG fetchBookings:', {
+        userObject: user,
+        userIdResolved: userIdToQuery,
+        userRole: user?.role
+      });
+      
+      const items = await bookingService.getUserBookings(userIdToQuery);
       // Attach slot details
       const withSlots = await Promise.all(items.map(async (b) => {
         const slot = await parkingService.getSlotById(b.slotId);
@@ -54,6 +64,7 @@ const Bookings = () => {
       setBookings(withSlots);
     } catch (error) {
       console.error('Error fetching bookings:', error);
+      console.error('Full error object:', error);
       toast.error('Failed to load bookings');
     } finally {
       setLoading(false);

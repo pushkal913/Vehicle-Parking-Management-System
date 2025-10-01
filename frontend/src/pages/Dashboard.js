@@ -127,8 +127,10 @@ const Dashboard = () => {
       updateUser({ vehicles: next });
       setShowAddVehicle(false);
       setVehicleForm({ make:'', model:'', year:'', color:'', licensePlate:'', vehicleType:'car' });
+      toast.success('Vehicle added successfully!');
     } catch (err) {
       console.error('Error adding vehicle from dashboard:', err);
+      toast.error(err.message || 'Failed to add vehicle');
     }
   };
 
