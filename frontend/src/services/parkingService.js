@@ -68,7 +68,7 @@ export const parkingService = {
   async setCurrentBooking(slotId, bookingId) {
     await updateDoc(doc(db, 'parkingSlots', slotId), {
       currentBookingId: bookingId,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
     });
   },
 
@@ -79,7 +79,7 @@ export const parkingService = {
     if (data.currentBookingId === bookingId) {
       await updateDoc(doc(db, 'parkingSlots', slotId), {
         currentBookingId: null,
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       });
     }
   },
